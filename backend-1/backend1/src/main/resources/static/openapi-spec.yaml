@@ -1,10 +1,10 @@
 openapi: "3.0.3"
 info:
   title: "backend1 API"
-  description: "APIs for receipts, purchases, and direct outflows"
+  description: "Backend API for receipts, purchases, and direct outflows"
   version: "1.0.0"
 servers:
-  - url: "http://192.168.0.115:8080"
+  - url: "https://localhost:8080"
 paths:
   /api/receipts:
     post:
@@ -26,6 +26,22 @@ paths:
     get:
       summary: "GET api/receipts"
       operationId: "getAllReceipts"
+      parameters:
+        - name: "from"
+          in: "query"
+          required: false
+          schema:
+            $ref: "#/components/schemas/Date"
+        - name: "until"
+          in: "query"
+          required: false
+          schema:
+            $ref: "#/components/schemas/Date"
+        - name: "outflowCategory"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
       responses:
         "200":
           description: "OK"
@@ -51,9 +67,9 @@ paths:
             '*/*':
               schema:
                 type: "object"
-  /api/purchase:
+  /api/purchases:
     post:
-      summary: "POST api/purchase"
+      summary: "POST api/purchases"
       operationId: "postOneToDB"
       requestBody:
         content:
@@ -69,8 +85,14 @@ paths:
               schema:
                 type: "string"
     get:
-      summary: "GET api/purchase"
+      summary: "GET api/purchases"
       operationId: "getAllPurchase"
+      parameters:
+        - name: "item"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
       responses:
         "200":
           description: "OK"
@@ -78,9 +100,9 @@ paths:
             '*/*':
               schema:
                 type: "object"
-  /api/purchase/{id}:
+  /api/purchases/{id}:
     get:
-      summary: "GET api/purchase/{id}"
+      summary: "GET api/purchases/{id}"
       operationId: "getOnePurchase"
       parameters:
         - name: "id"
@@ -96,9 +118,9 @@ paths:
             '*/*':
               schema:
                 type: "object"
-  /api/direct:
+  /api/directs:
     post:
-      summary: "POST api/direct"
+      summary: "POST api/directs"
       operationId: "postToDB"
       requestBody:
         content:
@@ -114,8 +136,26 @@ paths:
               schema:
                 type: "string"
     get:
-      summary: "GET api/direct"
+      summary: "GET api/directs"
       operationId: "getAllDirect"
+      parameters:
+        - name: "category"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+        - name: "cashFlowId"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+        - name: "receiptId"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
       responses:
         "200":
           description: "OK"
@@ -123,9 +163,9 @@ paths:
             '*/*':
               schema:
                 type: "object"
-  /api/direct/{id}:
+  /api/directs/{id}:
     get:
-      summary: "GET api/direct/{id}"
+      summary: "GET api/directs/{id}"
       operationId: "getDirectById"
       parameters:
         - name: "id"
@@ -144,13 +184,11 @@ paths:
 components:
   schemas:
     Date:
-      type: "string"
-      format: "\"YYYY-MM-DD\""
-      example: "\"2023-01-01\""
+      type: "object"
+      properties: { }
     Time:
-      type: "string"
-      format: "\"HH-MM-SS\""
-      example: "\"13:30:51\""
+      type: "object"
+      properties: { }
     ReceiptDTO:
       type: "object"
       properties:

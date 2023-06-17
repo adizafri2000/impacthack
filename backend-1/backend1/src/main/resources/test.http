@@ -1,5 +1,14 @@
+POST http://localhost:80/api/item
+Content-Type: application/json
+
+{}
+
+###
 ###
 GET http://localhost:8080/api/receipts
 
 ###
-GET http://localhost:8080/api/purchase/69
+
+GET http://192.168.0.100:8081/inflow/getbymonth/2023-07
+
+###

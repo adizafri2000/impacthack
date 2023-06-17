@@ -10,7 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/receipts")
@@ -23,18 +26,38 @@ public class ReceiptController {
     }
 
     @GetMapping("")
-    public ResponseEntity<?> getAllReceipts(){
-        ReceiptCollectionDTO receiptCollectionDTO;
+    public ResponseEntity<?> getAllReceipts(
+            @RequestParam(required = false) Optional<Date> from,
+            @RequestParam(required = false) Optional<Date> until,
+            @RequestParam(required = false) Optional<String> outflowCategory
+            ){
+        List<Receipt> receiptList;
         try{
-            receiptCollectionDTO = new ReceiptCollectionDTO(receiptRepository.findAll());
-            //throw new Exception();
-        }
-        catch (Exception e){
+            receiptList = receiptRepository.findAll();
+
+            if(outflowCategory.isPresent())
+                receiptList = receiptList
+                        .stream()
+                        .filter(receipt -> receipt.getOutflowCategory().equals(outflowCategory.get()))
+                        .collect(Collectors.toList());
+
+            if(from.isPresent())
+                receiptList = receiptList
+                        .stream()
+                        .filter(receipt -> receipt.getDateOfPurchase().after(from.get()))
+                        .collect(Collectors.toList());
+
+            if(until.isPresent())
+                receiptList = receiptList
+                        .stream()
+                        .filter(receipt -> receipt.getDateOfPurchase().before(until.get()))
+                        .collect(Collectors.toList());
+            } catch (Exception e){
             log.severe(e.getMessage());
             return new ResponseEntity<>("Service error",HttpStatus.SERVICE_UNAVAILABLE);
         }
-        log.info("Fetched "+Integer.toString(receiptCollectionDTO.receiptList().size())+" receipt records");
-        return new ResponseEntity<ReceiptCollectionDTO>(receiptCollectionDTO, HttpStatus.OK);
+        log.info("Fetched "+receiptList.size()+" receipt records");
+        return new ResponseEntity<ReceiptCollectionDTO>(new ReceiptCollectionDTO(receiptList), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -84,4 +107,6 @@ public class ReceiptController {
         }
         return new ResponseEntity<>("Success",HttpStatus.CREATED);
     }
+
+
 }

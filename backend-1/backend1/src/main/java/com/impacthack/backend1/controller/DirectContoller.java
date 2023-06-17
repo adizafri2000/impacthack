@@ -9,10 +9,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/direct")
+@RequestMapping("/api/directs")
 public class DirectContoller {
     private final static Logger log = Logger.getLogger(DirectContoller.class.getName());
     private final DirectRepository directRepository;
@@ -22,8 +27,39 @@ public class DirectContoller {
     }
 
     @GetMapping("")
-    public ResponseEntity<?> getAllDirect(){
-        return new ResponseEntity<DirectCollectionDTO>(new DirectCollectionDTO(directRepository.findAll()), HttpStatus.OK);
+    public ResponseEntity<?> getAllDirect(
+            @RequestParam(required = false) Optional<String> category,
+            @RequestParam(required = false) Optional<Integer> cashFlowId,
+            @RequestParam(required = false) Optional<Integer> receiptId
+    ){
+        List<Direct> directList;
+        try{
+            directList = directRepository.findAll();
+
+            if(category.isPresent())
+                directList = directList
+                        .stream()
+                        .filter(direct -> direct.getCategory().equals(category.get()))
+                        .collect(Collectors.toList());
+
+            if(cashFlowId.isPresent())
+                directList = directList
+                        .stream()
+                        .filter(direct -> Objects.equals(direct.getCashFlowId(), cashFlowId.get()))
+                        .collect(Collectors.toList());
+
+            if(receiptId.isPresent())
+                directList = directList
+                        .stream()
+                        .filter(direct -> Objects.equals(direct.getReceiptId(), receiptId.get()))
+                        .collect(Collectors.toList());
+
+
+        }catch (Exception e){
+            log.severe(e.getMessage());
+            return new ResponseEntity<>("Service error",HttpStatus.SERVICE_UNAVAILABLE);
+        }
+        return new ResponseEntity<DirectCollectionDTO>(new DirectCollectionDTO(directList), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

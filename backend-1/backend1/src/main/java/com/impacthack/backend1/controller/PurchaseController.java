@@ -8,10 +8,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/purchase")
+@RequestMapping("/api/purchases")
 public class PurchaseController {
     private final static Logger log = Logger.getLogger(PurchaseController.class.getName());
     private final PurchaseRepository purchaseRepository;
@@ -36,16 +40,24 @@ public class PurchaseController {
     }
 
     @GetMapping("")
-    public ResponseEntity<?> getAllPurchase(){
-        PurchaseCollectionDTO purchase;
+    public ResponseEntity<?> getAllPurchase(
+            @RequestParam(required = false) Optional<String> item
+    ){
+        List<Purchase> purchaseList;
         try{
-            purchase = new PurchaseCollectionDTO(purchaseRepository.findAll());
+            purchaseList = purchaseRepository.findAll();
+
+            if(item.isPresent())
+                purchaseList = purchaseList
+                        .stream()
+                        .filter(purchase -> purchase.getItem().equals(item.get()))
+                        .collect(Collectors.toList());
         }
         catch (Exception e){
             log.severe(e.getMessage());
             return new ResponseEntity<>("Service error",HttpStatus.SERVICE_UNAVAILABLE);
         }
-        return new ResponseEntity<PurchaseCollectionDTO>(purchase, HttpStatus.OK);
+        return new ResponseEntity<PurchaseCollectionDTO>(new PurchaseCollectionDTO(purchaseList), HttpStatus.OK);
     }
 
     @PostMapping("")
