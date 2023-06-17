@@ -1,0 +1,40 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200;300;400;600;700;800&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  padding: 0px;
+  margin: 0px;
+  box-sizing: border-box;
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 14px;
+}
+
+.active {
+  @apply text-white rounded-lg bg-blue-400
+}
+
+.activeClassName {
+  @apply  text-white 
+}
+
+.blue {
+  @apply bg-blue-500;
+}
+
+.green {
+  @apply bg-green-500;
+}
+
+.yellow {
+  @apply bg-yellow-500;
+}
+
+.orange {
+  @apply bg-orange-500;
+}
+
+.red {
+  @apply bg-red-500;
+}
