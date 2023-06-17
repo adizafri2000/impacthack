@@ -1,0 +1,197 @@
+openapi: "3.0.3"
+info:
+  title: "backend1 API"
+  description: "APIs for receipts, purchases, and direct outflows"
+  version: "1.0.0"
+servers:
+  - url: "http://192.168.0.115:8080"
+paths:
+  /api/receipts:
+    post:
+      summary: "POST api/receipts"
+      operationId: "postOneToDB"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReceiptDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+    get:
+      summary: "GET api/receipts"
+      operationId: "getAllReceipts"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/receipts/{id}:
+    get:
+      summary: "GET api/receipts/{id}"
+      operationId: "getOneReceiptById"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/purchase:
+    post:
+      summary: "POST api/purchase"
+      operationId: "postOneToDB"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PurchaseDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+    get:
+      summary: "GET api/purchase"
+      operationId: "getAllPurchase"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/purchase/{id}:
+    get:
+      summary: "GET api/purchase/{id}"
+      operationId: "getOnePurchase"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/direct:
+    post:
+      summary: "POST api/direct"
+      operationId: "postToDB"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DirectDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+    get:
+      summary: "GET api/direct"
+      operationId: "getAllDirect"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/direct/{id}:
+    get:
+      summary: "GET api/direct/{id}"
+      operationId: "getDirectById"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+components:
+  schemas:
+    Date:
+      type: "string"
+      format: "\"YYYY-MM-DD\""
+      example: "\"2023-01-01\""
+    Time:
+      type: "string"
+      format: "\"HH-MM-SS\""
+      example: "\"13:30:51\""
+    ReceiptDTO:
+      type: "object"
+      properties:
+        merchant:
+          type: "string"
+        dateOfPurchase:
+          $ref: "#/components/schemas/Date"
+        time:
+          $ref: "#/components/schemas/Time"
+        totalPrice:
+          type: "number"
+          format: "double"
+        outflowCategory:
+          type: "string"
+    PurchaseDTO:
+      type: "object"
+      properties:
+        item:
+          type: "string"
+        quantity:
+          type: "integer"
+          format: "int32"
+        unitPrice:
+          type: "number"
+          format: "double"
+        receiptId:
+          type: "integer"
+          format: "int32"
+    DirectDTO:
+      type: "object"
+      properties:
+        category:
+          type: "string"
+        unit:
+          type: "string"
+        quantity:
+          type: "integer"
+          format: "int32"
+        unitPrice:
+          type: "number"
+          format: "double"
+        cashFlowId:
+          type: "integer"
+          format: "int32"
