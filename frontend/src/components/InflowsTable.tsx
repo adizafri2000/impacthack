@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Icon,
   Table,
@@ -18,6 +18,7 @@ import {
 } from "@tremor/react";
 import { InformationCircleIcon } from "@heroicons/react/solid";
 import { inflowTableItem } from "../data/DumyData";
+import { DataContext } from "../Context";
 
 type Props = {};
 
@@ -28,6 +29,11 @@ const deltaTypes: { [key: string]: DeltaType } = {
 };
 
 const InflowsT = (props: Props) => {
+
+  const {isLoading,inflowData} = useContext(DataContext);
+   if (!isLoading && inflowData){
+    console.log(inflowData, "id")
+   }
 
   return (
     <>

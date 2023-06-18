@@ -10,6 +10,7 @@ import Layout from "./components/layout/Layout";
 import Cashflow from "./pages/Cashflow";
 import Inventory from "./pages/Inventory";
 import Projections from "./pages/Projections";
+import { DataProvider } from "./Context";
 
 type Props = {};
 
@@ -25,7 +26,11 @@ const router = createBrowserRouter(
 );
 
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <DataProvider>
+      <RouterProvider router={router} />
+    </DataProvider>
+  );
 };
 
 export default App;
