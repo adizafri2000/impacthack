@@ -16,14 +16,16 @@ EXECUTE PROCEDURE update_timestamp_function();
 -- function to insert data to the direct table when purchase table receives new inserts
 CREATE OR REPLACE FUNCTION add_direct_outflow_function() RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO appschema.direct(category, quantity, unit_price, cashflow_id, receipt_id)
-    VALUES (NEW.item,
-            NEW.quantity,
-            new.unit_price,
-            (select id from appschema.cash_flow_record order by updated_at DESC limit 1),
-            new.receipt_id
-           );
-    RETURN NEW;
+    if ((select outflow_category from appschema.receipt where receipt.id=new.receipt_id)='direct') then
+        INSERT INTO appschema.direct(category, quantity, unit_price, cashflow_id, receipt_id)
+        VALUES (NEW.item,
+                NEW.quantity,
+                new.unit_price,
+                (select id from appschema.cash_flow_record order by updated_at DESC limit 1),
+                new.receipt_id
+               );
+    end if;
+    return new;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -31,19 +33,22 @@ CREATE OR REPLACE TRIGGER add_direct_outflow
     after insert
     ON appschema.purchase
     FOR EACH ROW
+    --WHEN ((select outflow_category from appschema.receipt where id=new.receipt_id)='direct')
 EXECUTE PROCEDURE add_direct_outflow_function();
 -- function and trigger ends
 
 -- function to insert data to the indirect table when purchase table receives new inserts
 CREATE OR REPLACE FUNCTION add_indirect_outflow_function() RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO appschema.indirect(category, price,cashflow_id, receipt_id)
-    VALUES (new.item,
-            new.unit_price,
-            (select id from appschema.cash_flow_record order by updated_at DESC limit 1),
-            new.receipt_id
-           );
-    RETURN NEW;
+    if ((select outflow_category from appschema.receipt where receipt.id=new.receipt_id)='indirect') then
+        INSERT INTO appschema.indirect(category, price,cashflow_id, receipt_id)
+        VALUES (new.item,
+                new.unit_price,
+                (select id from appschema.cash_flow_record order by updated_at DESC limit 1),
+                new.receipt_id
+               );
+    end if;
+    return new;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -153,3 +158,38 @@ CREATE OR REPLACE TRIGGER profit_indirect_outflow_update
     ON appschema.indirect
     FOR EACH ROW
 EXECUTE PROCEDURE profit_indirect_outflow_updater_function();
+
+--closing balance generation
+CREATE OR REPLACE FUNCTION closing_balance_updater_function() RETURNS TRIGGER AS $$
+BEGIN
+    --check if today's month has passed the current
+    if (
+        ((select extract(MONTH FROM CURRENT_DATE))-(select extract(MONTH FROM (select month from appschema.cash_flow_record))))>0
+        ) then
+        --check if for the current cash flow month, were there any sales inflow records
+        if(
+            (select count(id)
+             from appschema.inflow
+             where cashflow_id=(
+                select id
+                from appschema.cash_flow_record cfr
+                where cfr.closing_balance is null
+             ))>0
+          ) then
+            update appschema.cash_flow_record
+            set closing_balance = (inflow - outflow + (select closing_balance from (select * from appschema.cash_flow_record cfr order by month desc limit 2) as sub order by closing_balance limit 1))
+            where id=new.cashflow_id;
+        end if;
+    end if;
+    RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+
+    CREATE OR REPLACE TRIGGER closing_balance_updater
+    after insert
+    ON appschema.inflow
+    FOR EACH ROW
+EXECUTE PROCEDURE closing_balance_updater_function();
+
+

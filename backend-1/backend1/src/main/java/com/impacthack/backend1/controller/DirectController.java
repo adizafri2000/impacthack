@@ -3,13 +3,11 @@ package com.impacthack.backend1.controller;
 import com.impacthack.backend1.dto.DirectCollectionDTO;
 import com.impacthack.backend1.dto.DirectDTO;
 import com.impacthack.backend1.model.Direct;
-import com.impacthack.backend1.model.Purchase;
 import com.impacthack.backend1.repository.DirectRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,11 +16,11 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/directs")
-public class DirectContoller {
-    private final static Logger log = Logger.getLogger(DirectContoller.class.getName());
+public class DirectController {
+    private final static Logger log = Logger.getLogger(DirectController.class.getName());
     private final DirectRepository directRepository;
 
-    public DirectContoller(DirectRepository directRepository) {
+    public DirectController(DirectRepository directRepository) {
         this.directRepository = directRepository;
     }
 
